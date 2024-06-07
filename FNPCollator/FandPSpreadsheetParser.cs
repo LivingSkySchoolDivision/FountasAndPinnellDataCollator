@@ -52,6 +52,23 @@ public static class FandPSpreadsheetParser
                     ICell cell_LevelInstruct = row.GetCell(11); // L
                     record.Level = parseCellValue(cell_LevelInstruct);
 
+                    // Convert the score if we need to
+                    
+                    // Convert blanks to "NA"
+                    if (string.IsNullOrEmpty(record.Level))
+                    {
+                        record.Level = "NA";
+                    }
+
+                    // Convert "PRE" and "EM" to "NM"
+                    if (
+                        (record.Level.ToLower().Trim() == "PRE") ||
+                        (record.Level.ToLower().Trim() == "EM")
+                    )
+                    {
+                        record.Level = "NM";
+                    }
+
                     record.AssessmentDate = fileDate;
                 }
             }
