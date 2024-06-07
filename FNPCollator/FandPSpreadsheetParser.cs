@@ -1,4 +1,3 @@
-using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
@@ -7,6 +6,63 @@ namespace FNPCollator;
 public static class FandPSpreadsheetParser
 {
     private const int maxRecordsToAttemptPerFile = 100;
+
+    private static readonly List<School> _schools = new List<School>() {
+        new School() { Name = "Battleford Central School", DAN = "5810211", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Bready Elementary School", DAN = "5850201", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Cando Community School", DAN = "5010213", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Connaught School", DAN = "5850401", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Cut Knife Community School", DAN = "5910123", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Hafford Central School", DAN = "5710213", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Hartley Clark School", DAN = "6410721", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Heritage Christian School", DAN = "5894003", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Hillsvale Colony School", DAN = "5910313", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Home Based", DAN = "2020500", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Kerrobert Composite School", DAN = "4410223", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Lakeview Colony School", DAN = "5911011", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Lawrence School", DAN = "5850501", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Leoville Central School", DAN = "6410313", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Luseland School", DAN = "4410323", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Macklin School", DAN = "4410413", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Manacowin School", DAN = "7350113", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Maymont Central School", DAN = "5810713", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "McKitrick Community School", DAN = "5850601", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "McLurg High School", DAN = "5910923", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Meadow Lake Christian Academy", DAN = "6694003", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Medstead Central School", DAN = "6410513", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Newmark Colony School", DAN = "6710722", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Norman Carter School", DAN = "5910911", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "North Battleford Comprehensive High School", DAN = "5850904", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Scott Colony School", DAN = "5911113", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Spiritwood High School", DAN = "6410713", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "St. Vital Catholic School", DAN = "5810221", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Unity Composite High School", DAN = "5910813", Identifiers = new List<string>() { "", "", "",}},
+        new School() { Name = "Unity Public School", DAN = "5910711", Identifiers = new List<string>() { "", "", "",}}
+    };
+
+    private static string getSchoolDAN(string input) 
+    {
+        // Check exact name matches
+        foreach(School school in _schools) 
+        {
+            if (String.Equals(school.Name.ToLower(), input.ToLower()))
+            {
+                return school.DAN;
+            }
+        }
+
+        // Check identifier matches
+        foreach(School school in _schools) 
+        {
+            foreach (string term in school.Identifiers)
+            if (String.Equals(term.ToLower(), input.ToLower()))
+            {
+                return school.DAN;
+            }
+        }
+        
+        throw new Exception("School not found: " + input);
+    }
 
     private static string parseCellValue(ICell cell)
     {
@@ -36,7 +92,7 @@ public static class FandPSpreadsheetParser
         }
     }
 
-    private static StudentRecord parseStudentRecord(IRow row, DateTime fileDate)
+    private static StudentRecord parseStudentRecord(IRow row, FandPSpreadsheet parentFile)
     {
         StudentRecord record = new StudentRecord();
 
@@ -69,7 +125,9 @@ public static class FandPSpreadsheetParser
                         record.Level = "NM";
                     }
 
-                    record.AssessmentDate = fileDate;
+                    record.AssessmentDate = parentFile.AssessmentDate;
+                    record.SchoolDAN = parentFile.SchoolDAN;
+                    record.SourceSchoolFileName = parentFile.FileName;
                 }
             }
         }
@@ -121,10 +179,15 @@ public static class FandPSpreadsheetParser
                     {
                         throw new Exception("Unable to parse - file does not appear to be formatted correctly.");
                     } else {
+                        // Try to parse out the school from the school name so 
+                        // we have it's DAN
+                        parsedFile.SchoolDAN = getSchoolDAN(parsedFile.SchoolName); 
+
+                        // Parse out any student records in the file
                         for(int x = 0; x <= maxRecordsToAttemptPerFile; x++ )
                         {
                             IRow row = sheet_Spring.GetRow(x+9);
-                            StudentRecord record = parseStudentRecord(row, parsedFile.AssessmentDate);
+                            StudentRecord record = parseStudentRecord(row, parsedFile);
                             if (record.isValid())
                             {
                                 parsedFile.Records.Add(record);

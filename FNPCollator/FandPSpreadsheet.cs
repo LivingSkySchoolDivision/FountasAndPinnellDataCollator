@@ -16,7 +16,7 @@ public class FandPSpreadsheet
     public string FileName { get; set; }
     public string FullFilePath { get; set; }
     public string SchoolName { get; set; }
-    public School School { get; set; }
+    public string SchoolDAN { get; set; }
     public string Teacher { get; set; }
     public string Grade { get; set; }
     public DateTime AssessmentDate { get; set; }

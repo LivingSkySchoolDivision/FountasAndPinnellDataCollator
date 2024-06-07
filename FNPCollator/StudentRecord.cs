@@ -16,6 +16,8 @@ public class StudentRecord
     public string Name { get; set; }
     public string GovID { get; set; }
     public string Grade { get; set; }
+    public string SchoolDAN { get; set; }
+    public string SourceSchoolFileName { get; set; }
 
     public DateTime AssessmentDate { get; set; }
 
@@ -43,7 +45,7 @@ public class StudentRecord
 
     public override string ToString()
     {
-        return $"StudentRecord \tGrade:'{this.Grade}' \tLID:'{this.GovID}' \tLVL:'{this.Level}' \tDate:'{this.AssessmentDate.ToShortDateString()}' ";
+        return $"StudentRecord \tGrade:'{this.Grade}' \tLID:'{this.GovID}' \tLVL:'{this.Level}' \tDate:'{this.AssessmentDate.ToShortDateString()}' \tDAN:'{this.SchoolDAN}' \tFile:'{this.SourceSchoolFileName}' ";
     }
 
 }
