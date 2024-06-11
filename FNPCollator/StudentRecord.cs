@@ -18,12 +18,18 @@ public class StudentRecord
     public string Grade { get; set; }
     public string SchoolDAN { get; set; }
     public string SourceSchoolFileName { get; set; }
+    public string MSSWithdrawlDate { get; set; }
 
     public DateTime AssessmentDate { get; set; }
 
     public string Level { get; set; }
 
-    public bool isValid() 
+    public bool hasWithdrawDate()
+    {
+        return !string.IsNullOrEmpty(this.MSSWithdrawlDate);
+    }
+
+    public bool isValid()
     {
         if (
             (!string.IsNullOrEmpty(this.GovID)) &&
@@ -38,14 +44,14 @@ public class StudentRecord
                 )
             {
                 return true;
-            }            
+            }
         }
         return false;
     }
 
     public override string ToString()
     {
-        return $"StudentRecord \tGrade:'{this.Grade}' \tLID:'{this.GovID}' \tLVL:'{this.Level}' \tDate:'{this.AssessmentDate.ToShortDateString()}' \tDAN:'{this.SchoolDAN}' \tFile:'{this.SourceSchoolFileName}' ";
+        return $"StudentRecord \tGrade:'{this.Grade}' \tLID:'{this.GovID}' \tLVL:'{this.Level}' \tDate:'{this.AssessmentDate.ToShortDateString()}' \tDAN:'{this.SchoolDAN}' \tFile:'{this.SourceSchoolFileName}' \tWithdrawn:{this.hasWithdrawDate()}";
     }
 
 }
