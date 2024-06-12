@@ -1,24 +1,13 @@
 namespace FNPCollator;
 
-/*
-    Fields we care about in the final product
-     - LearningID / GovID
-     - School Number / DAN
-     - Completed Assessment Date
-     - Grade
-     - Instructional Score
-     - Name of the source file for this record
-*/
-
-
 public class FandPSpreadsheet
 {
-    public string FileName { get; set; }
-    public string FullFilePath { get; set; }
-    public string SchoolName { get; set; }
-    public string SchoolDAN { get; set; }
-    public string Teacher { get; set; }
-    public string Grade { get; set; }
+    public string FileName { get; set; } = string.Empty;
+    public string FullFilePath { get; set; } = string.Empty;
+    public string SchoolName { get; set; } = string.Empty;
+    public string SchoolDAN { get; set; } = string.Empty;
+    public string Teacher { get; set; } = string.Empty;
+    public string Grade { get; set; } = string.Empty;
     public DateTime AssessmentDate { get; set; }
     
     public List<StudentRecord> Records { get; set; } = new List<StudentRecord>();
@@ -35,8 +24,7 @@ public class FandPSpreadsheet
         )
         {
             return true;
-        }
-        
+        }        
 
         return false;
     }

@@ -1,24 +1,13 @@
 namespace FNPCollator;
 
-/*
-    Fields we care about in the final product
-     - LearningID / GovID
-     - School Number / DAN
-     - Completed Assessment Date
-     - Grade
-     - Instructional Score
-     - Name of the source file for this record
-*/
-
-
 public class StudentRecord
 {
-    public string Name { get; set; }
-    public string GovID { get; set; }
-    public string Grade { get; set; }
-    public string SchoolDAN { get; set; }
-    public string SourceSchoolFileName { get; set; }
-    public string MSSWithdrawlDate { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string GovID { get; set; } = string.Empty;
+    public string Grade { get; set; } = string.Empty;
+    public string SchoolDAN { get; set; } = string.Empty;
+    public string SourceSchoolFileName { get; set; } = string.Empty;
+    public string MSSWithdrawlDate { get; set; } = string.Empty;
 
     public DateTime AssessmentDate { get; set; }
 
@@ -53,5 +42,4 @@ public class StudentRecord
     {
         return $"StudentRecord \tGrade:'{this.Grade}' \tLID:'{this.GovID}' \tLVL:'{this.Level}' \tDate:'{this.AssessmentDate.ToShortDateString()}' \tDAN:'{this.SchoolDAN}' \tFile:'{this.SourceSchoolFileName}' \tWithdrawn:{this.hasWithdrawDate()}";
     }
-
 }
