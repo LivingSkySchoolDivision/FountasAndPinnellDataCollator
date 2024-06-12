@@ -3,6 +3,8 @@ For collecting F&P data from multiple files and collating that data into a singl
 
 This utility is very specific to how Living Sky School Division No. 202 collects F&P data from our teachers. An example file can be found in the `ExampleFiles` directory of this repository.
 
+You can obtain the EXE for this utility [HERE](https://github.com/LivingSkySchoolDivision/FountasAndPinnellDataCollator/releases/latest/download/FNPCollator.exe).
+
 # Command line options
 | Command               | Description                                                                                    |
 |-----------------------|------------------------------------------------------------------------------------------------|
