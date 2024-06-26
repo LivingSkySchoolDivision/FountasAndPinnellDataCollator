@@ -17,13 +17,10 @@ public static class FandPSpreadsheetParser
                 switch (cell.GetCachedFormulaResultTypeEnum()) {
                     case CellType.Boolean:
                         return cell.BooleanCellValue.ToString() ?? string.Empty;
-                        break;
                     case CellType.Numeric:
                         return cell.NumericCellValue.ToString() ?? string.Empty;
-                        break;
                     case CellType.String:
                         return cell.RichStringCellValue.ToString() ?? string.Empty;
-                        break;
                     default:
                         return cell?.ToString() ?? string.Empty;
                 }
@@ -49,6 +46,10 @@ public static class FandPSpreadsheetParser
                     record.Name = row.GetCell(2)?.ToString() ?? string.Empty;
                     record.MSSWithdrawlDate = row.GetCell(8)?.ToString() ?? string.Empty;
 
+                    record.EAL = parseCellValue(row.GetCell(6)) ?? string.Empty;
+                    record.IIP = parseCellValue(row.GetCell(5)) ?? string.Empty;
+
+
                     ICell cell_LevelInstruct = row.GetCell(11); // L
                     record.Level = parseCellValue(cell_LevelInstruct).ToUpper();
 
@@ -59,6 +60,7 @@ public static class FandPSpreadsheetParser
                     if (string.IsNullOrEmpty(record.Level))
                     {
                         record.Level = "NM";
+                        record.LevelWasBlankButWasCorrected = true;
                     }
 
                     // Convert "PRE" and "EM" to "NM"
@@ -101,20 +103,13 @@ public static class FandPSpreadsheetParser
                 // The "Spring" sheet contains the student records we care about
                 ISheet sheet_Spring = workbook.GetSheet("Spring");
 
-                if (
-                    (sheet_Fall == null) ||
-                    (sheet_Spring == null)
-                )
+                if ((sheet_Fall != null) && (sheet_Spring != null))
                 {
-                    throw new Exception("Unable to parse - file does not appear to be formatted correctly (Missing 'Fall' and 'Spring' sheets).");
-                } else {
                     parsedFile.Records = new List<StudentRecord>();
 
-
-
-                    parsedFile.Teacher = parseCellValue(sheet_Spring?.GetRow(3)?.GetCell(6)) ?? "UNKNOWN";
-                    parsedFile.Grade = parseCellValue(sheet_Spring?.GetRow(0)?.GetCell(9)) ?? "UNKNOWN";
-                    parsedFile.SchoolName = parseCellValue(sheet_Spring?.GetRow(2)?.GetCell(6)) ?? "UNKNOWN";
+                    parsedFile.Teacher = parseCellValue(sheet_Spring.GetRow(3).GetCell(6));
+                    parsedFile.Grade = parseCellValue(sheet_Spring.GetRow(0).GetCell(9));
+                    parsedFile.SchoolName = parseCellValue(sheet_Spring.GetRow(2).GetCell(6));
                     parsedFile.AssessmentDate = DateTime.Parse(sheet_Spring?.GetRow(4)?.GetCell(8)?.ToString() ?? "1900-01-01 00:00:00");
 
 
@@ -138,14 +133,19 @@ public static class FandPSpreadsheetParser
                         // Parse out any student records in the file
                         for(int x = 0; x <= maxRecordsToAttemptPerFile; x++ )
                         {
-                            IRow row = sheet_Spring.GetRow(x+9);
-                            StudentRecord record = parseStudentRecord(row, parsedFile);
-                            if (record.isValid())
+                            if (sheet_Spring != null)
                             {
-                                parsedFile.Records.Add(record);
+                                IRow row = sheet_Spring.GetRow(x+9);
+                                StudentRecord record = parseStudentRecord(row, parsedFile);
+                                if (record.isValid())
+                                {
+                                    parsedFile.Records.Add(record);
+                                }
                             }
                         }
                     }
+                } else {
+                    throw new Exception("Unable to parse - file does not appear to be formatted correctly (Missing 'Fall' and 'Spring' sheets).");
                 }
             }
 

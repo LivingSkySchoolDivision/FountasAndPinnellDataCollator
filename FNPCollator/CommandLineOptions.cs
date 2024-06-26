@@ -8,7 +8,7 @@ public class CommandLineOptions
         [Option('i',"infolder", Required = true, HelpText = "The folder that contains the F&P data spreadsheets to collate.")]
         public string InputFolderPath { get;set; } = string.Empty;
 
-        [Option('o',"out", Required = true, HelpText = "The filename for the output CSV file.")]
+        [Option('o',"out", Required = false, HelpText = "The filename for the output CSV file.")]
         public string OutFile { get;set; } = string.Empty;
 
         [Option('f',"filter", Required = false, HelpText = "A filter to use for reading files. Defaults to '*.xlsx'.")]
@@ -22,4 +22,7 @@ public class CommandLineOptions
 
         [Option('v', "verbose", Required = false, HelpText = "Show extra information on the console as the program runs.")]
         public bool Verbose { get; set; }
+
+        [Option("analyze", Required = false, HelpText = "Show analalysis of the data, including the percentage of students in a grade who are at or exceeding their reading level.")]
+        public bool Analyze { get; set; }
 }

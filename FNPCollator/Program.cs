@@ -19,8 +19,11 @@ class Program
                     Options.InputFolderPath = actualFolderPath;
 
                     // Check the output file path
-                    string actualOutputFilePath = Path.GetFullPath(Options.OutFile);
-                    Options.OutFile = actualOutputFilePath;
+                    if (!string.IsNullOrEmpty(Options.OutFile))
+                    {
+                        string actualOutputFilePath = Path.GetFullPath(Options.OutFile);
+                        Options.OutFile = actualOutputFilePath;
+                    }
 
                     if (!string.IsNullOrEmpty(Options.InputFilter))
                     {
@@ -30,14 +33,20 @@ class Program
                             {
                                 Console.WriteLine("Input folder is: " + Options.InputFolderPath);
                                 Console.WriteLine("Filter is " + Options.InputFilter);
-                                Console.WriteLine("Output file is " + Options.OutFile);
+                                if (!string.IsNullOrEmpty(Options.OutFile))
+                                {
+                                    Console.WriteLine("Output file is " + Options.OutFile);
+                                }
                             }
 
-                            if (File.Exists(Options.OutFile))
+                            if (!string.IsNullOrEmpty(Options.OutFile))
                             {
-                                if (Options.Verbose)
+                                if (File.Exists(Options.OutFile))
                                 {
-                                    Console.WriteLine("WARNING: Output file exists - will be overridden");
+                                    if (Options.Verbose)
+                                    {
+                                        Console.WriteLine("WARNING: Output file exists - will be overridden");
+                                    }
                                 }
                             }
 
@@ -93,21 +102,34 @@ class Program
                                 {
                                     Console.WriteLine($"{file.SchoolDAN} \t{file.AssessmentDate.ToShortDateString()} \t{file.Records.Count} \t{file.Records.Where(x => x.hasWithdrawDate()).Count()} \t{file.FileName}");
                                 }
-                            }
-                            
-                            // Generate the output file
-                            string file_output = CSVFileGenerator.GenerateCSV(inputFiles, Options.ShowHeaderOnOutput, Options.ShowFileNameOnOutput);
+                            }    
 
-                            // Check to see if we need to delete an existing file
-                            if (File.Exists(Options.OutFile))
-                            {
-                                Console.WriteLine("WARNING: Deleting existing file '" + Options.OutFile + "'!");
-                                File.Delete(Options.OutFile);
-                            }
 
-                            using (StreamWriter outFile = new StreamWriter(Options.OutFile))
+                            //  Generate the file output
+                            string file_output = string.Empty;
+                            if (Options.Analyze) 
+                            {                                
+                                file_output = DataAnalysis.GetFileAnalysis(inputFiles, Options.Verbose);
+                            } else {
+                                file_output = CSVFileGenerator.GenerateCSV(inputFiles, Options.ShowHeaderOnOutput, Options.ShowFileNameOnOutput);
+                            }                        
+
+                            if (!string.IsNullOrEmpty(Options.OutFile))
                             {
-                                outFile.Write(file_output);
+                                // Generate the output file                               
+
+                                if (File.Exists(Options.OutFile))
+                                {
+                                    Console.WriteLine("WARNING: Deleting existing file '" + Options.OutFile + "'!");
+                                    File.Delete(Options.OutFile);
+                                }
+
+                                using (StreamWriter outFile = new StreamWriter(Options.OutFile))
+                                {
+                                    outFile.Write(file_output);
+                                }
+                            } else {
+                                Console.WriteLine(file_output);
                             }
 
                         } else {

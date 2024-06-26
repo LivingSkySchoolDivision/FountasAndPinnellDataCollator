@@ -8,10 +8,13 @@ public class StudentRecord
     public string SchoolDAN { get; set; } = string.Empty;
     public string SourceSchoolFileName { get; set; } = string.Empty;
     public string MSSWithdrawlDate { get; set; } = string.Empty;
+    public string IIP { get; set; } = string.Empty;
+    public string EAL { get; set; } = string.Empty;
+    public bool LevelWasBlankButWasCorrected = false;
 
     public DateTime AssessmentDate { get; set; }
 
-    public string Level { get; set; }
+    public string Level { get; set; } = string.Empty;
 
     public bool hasWithdrawDate()
     {
