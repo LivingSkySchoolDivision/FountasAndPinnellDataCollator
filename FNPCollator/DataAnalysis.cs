@@ -4,13 +4,14 @@ namespace FNPCollator;
 
 public class DataAnalysis
 {
-    static readonly Dictionary<string,int> targetLevelByGrade = new Dictionary<string, int>()
+    static readonly Dictionary<string, int> targetLevelByGrade = new Dictionary<string, int>()
     {
         {"1", 8},   // G
         {"2", 12},  // L
         {"3", 15}   // O
     };
 
+    // These numbers are arbitrary, they are really only to rank the letters to compare to the target values
     static readonly Dictionary<string, int> levelValues = new Dictionary<string, int>()
     {
         {"NM", 0},
@@ -46,8 +47,15 @@ public class DataAnalysis
     {
         if (targetLevelByGrade.ContainsKey(grade))
         {
+
             int target = targetLevelByGrade[grade];
-            int given = levelValues[level];
+
+            int given = 9999; // If we see a new level, default it to be below any existing level
+
+            if (levelValues.ContainsKey(level))
+            {
+                given = levelValues[level];
+            }
             return given >= target;
         }
         throw new Exception("Unknown grade: " + grade);
@@ -55,11 +63,12 @@ public class DataAnalysis
 
     private static string getPercent(double needle, double haystack)
     {
-        return $"{(((double)needle/(double)haystack)):P3}";
+        return $"{(((double)needle / (double)haystack)):P3}";
     }
 
     public static string GetFileAnalysis(List<FandPSpreadsheet> files, bool verbose)
     {
+
         StringBuilder returnMe = new StringBuilder();
 
         returnMe.Append("DATA ANALYSIS\n");
@@ -75,15 +84,15 @@ public class DataAnalysis
         Dictionary<string, List<StudentRecord>> skipped_IIP = new Dictionary<string, List<StudentRecord>>();
         Dictionary<string, List<StudentRecord>> skipped_NA = new Dictionary<string, List<StudentRecord>>();
 
-        foreach(FandPSpreadsheet file in files)
+        foreach (FandPSpreadsheet file in files)
         {
-            foreach(StudentRecord record in file.Records)
+            foreach (StudentRecord record in file.Records)
             {
                 totalStudents++;
 
                 bool shouldSkipThisStudent = false;
 
-                // Check if we should skip beacuse the student is withdrawn
+                // Check if we should skip because the student is withdrawn
                 if (record.hasWithdrawDate())
                 {
                     shouldSkipThisStudent = true;
@@ -136,7 +145,9 @@ public class DataAnalysis
                 if (!observedStudentNumbers.ContainsKey(record.GovID))
                 {
                     observedStudentNumbers.Add(record.GovID, new List<string>());
-                } else {
+                }
+                else
+                {
                     duplicateStudentIDs.Add(record.GovID);
                 }
                 observedStudentNumbers[record.GovID].Add($"{file.FileName} {record.GovID} {record.Name} {record.Level}");
@@ -145,41 +156,46 @@ public class DataAnalysis
 
         returnMe.Append($"Files analyzed: {files.Count}\n");
         returnMe.Append($"Student records analyzed: {totalStudents}\n");
-        returnMe.Append($"Unique students seen: {observedStudentNumbers.Count} ({getPercent(observedStudentNumbers.Count,totalStudents)})\n");
-        returnMe.Append($"Duplicate students seen: {duplicateStudentIDs.Count} ({getPercent(duplicateStudentIDs.Count,totalStudents)})\n");
+        returnMe.Append($"Unique students seen: {observedStudentNumbers.Count} ({getPercent(observedStudentNumbers.Count, totalStudents)})\n");
+        returnMe.Append($"Duplicate students seen: {duplicateStudentIDs.Count} ({getPercent(duplicateStudentIDs.Count, totalStudents)})\n");
 
         // returnMe.Append($"\n");
 
         returnMe.Append($"\nObserved duplicate student records:\n");
-        foreach(string govid in duplicateStudentIDs)
+        foreach (string govid in duplicateStudentIDs)
         {
-            foreach(string meta in observedStudentNumbers[govid])
+            foreach (string meta in observedStudentNumbers[govid])
             {
                 returnMe.Append($" {meta}\n");
             }
         }
 
         returnMe.Append($"\nGrades observed: {studentsByGrade.Count} (");
-        foreach(string grade in studentsByGrade.Keys)
+        foreach (string grade in studentsByGrade.Keys)
         {
             returnMe.Append($"{grade},");
         }
-        returnMe.Remove(returnMe.Length-1,1);
+        returnMe.Remove(returnMe.Length - 1, 1);
         returnMe.Append($")\n\n");
 
-        foreach(string grade in studentsByGrade.Keys)
+        foreach (string grade in studentsByGrade.Keys)
         {
             returnMe.Append($"\nGrade {grade}\n--------\n");
+
             List<StudentRecord> recordsAtOrExceedingGradeLevel = new List<StudentRecord>();
             List<StudentRecord> recordsBelowGradeLevel = new List<StudentRecord>();
 
-            foreach(StudentRecord record in studentsByGrade[grade])
+            foreach (StudentRecord record in studentsByGrade[grade])
             {
+
                 bool atLevel = isAtGradeLevel(record.Level, record.Grade);
+
                 if (atLevel)
                 {
                     recordsAtOrExceedingGradeLevel.Add(record);
-                } else {
+                }
+                else
+                {
                     recordsBelowGradeLevel.Add(record);
                 }
             }
@@ -207,52 +223,52 @@ public class DataAnalysis
 
             returnMe.Append($" Total records: {studentsByGrade[grade].Count + thisgrade_skipped_eal + thisgrade_skipped_iip + thisgrade_skipped_na}\n");
             returnMe.Append($" Total records after exemptions: {studentsByGrade[grade].Count}\n");
-            returnMe.Append($" Total at or exceeding grade level: {recordsAtOrExceedingGradeLevel.Count} ({getPercent(recordsAtOrExceedingGradeLevel.Count,studentsByGrade[grade].Count)})\n");
-            returnMe.Append($" Total not yet meeting grade level: {recordsBelowGradeLevel.Count} ({getPercent(recordsBelowGradeLevel.Count,studentsByGrade[grade].Count)})\n");
+            returnMe.Append($" Total at or exceeding grade level: {recordsAtOrExceedingGradeLevel.Count} ({getPercent(recordsAtOrExceedingGradeLevel.Count, studentsByGrade[grade].Count)})\n");
+            returnMe.Append($" Total not yet meeting grade level: {recordsBelowGradeLevel.Count} ({getPercent(recordsBelowGradeLevel.Count, studentsByGrade[grade].Count)})\n");
 
             // exempted
-            returnMe.Append($" Total exempted (EAL/IIP): {totalSkippedThisGrade} ({getPercent(totalSkippedThisGrade,studentsByGrade[grade].Count + thisgrade_skipped_eal + thisgrade_skipped_iip + thisgrade_skipped_na)})\n");
-            returnMe.Append($"  EAL: {thisgrade_skipped_eal} ({getPercent(thisgrade_skipped_eal,studentsByGrade[grade].Count + thisgrade_skipped_eal + thisgrade_skipped_iip + thisgrade_skipped_na)})\n");
-            returnMe.Append($"  IIP: {thisgrade_skipped_iip} ({getPercent(thisgrade_skipped_iip,studentsByGrade[grade].Count + thisgrade_skipped_eal + thisgrade_skipped_iip + thisgrade_skipped_na)})\n");
-            returnMe.Append($" Total not participating (NA): {thisgrade_skipped_na} ({getPercent(thisgrade_skipped_na,studentsByGrade[grade].Count + thisgrade_skipped_eal + thisgrade_skipped_iip + thisgrade_skipped_na)})\n");
+            returnMe.Append($" Total exempted (EAL/IIP): {totalSkippedThisGrade} ({getPercent(totalSkippedThisGrade, studentsByGrade[grade].Count + thisgrade_skipped_eal + thisgrade_skipped_iip + thisgrade_skipped_na)})\n");
+            returnMe.Append($"  EAL: {thisgrade_skipped_eal} ({getPercent(thisgrade_skipped_eal, studentsByGrade[grade].Count + thisgrade_skipped_eal + thisgrade_skipped_iip + thisgrade_skipped_na)})\n");
+            returnMe.Append($"  IIP: {thisgrade_skipped_iip} ({getPercent(thisgrade_skipped_iip, studentsByGrade[grade].Count + thisgrade_skipped_eal + thisgrade_skipped_iip + thisgrade_skipped_na)})\n");
+            returnMe.Append($" Total not participating (NA): {thisgrade_skipped_na} ({getPercent(thisgrade_skipped_na, studentsByGrade[grade].Count + thisgrade_skipped_eal + thisgrade_skipped_iip + thisgrade_skipped_na)})\n");
 
             if (verbose)
             {
                 returnMe.Append($"\n");
                 returnMe.Append($" Grade {grade} meeting or exceeding: \n");
-                foreach(StudentRecord record in recordsAtOrExceedingGradeLevel)
+                foreach (StudentRecord record in recordsAtOrExceedingGradeLevel)
                 {
                     returnMe.Append($"  {record.GovID}\t{record.Level}\t{record.Name}\t{record.SourceSchoolFileName}\n");
                 }
 
                 returnMe.Append($" Grade {grade} not yet meeting: \n");
-                foreach(StudentRecord record in recordsBelowGradeLevel)
+                foreach (StudentRecord record in recordsBelowGradeLevel)
                 {
                     returnMe.Append($"  {record.GovID}\t{record.Level}\t{record.Name}\t{record.SourceSchoolFileName}\n");
                 }
 
                 returnMe.Append($" Grade {grade} skipped due to IIP (2a/2b) ({thisgrade_skipped_iip}): \n");
-                foreach(string g in skipped_IIP.Keys)
+                foreach (string g in skipped_IIP.Keys)
                 {
-                    foreach(StudentRecord record in skipped_IIP[g])
+                    foreach (StudentRecord record in skipped_IIP[g])
                     {
                         returnMe.Append($"  {record.GovID}\t{record.Level}\t{record.Name}\t{record.SourceSchoolFileName}\n");
                     }
                 }
 
                 returnMe.Append($" Grade {grade} skipped due to EAL (A1.1/A1.2) ({thisgrade_skipped_eal}): \n");
-                foreach(string g in skipped_EAL.Keys)
+                foreach (string g in skipped_EAL.Keys)
                 {
-                    foreach(StudentRecord record in skipped_EAL[g])
+                    foreach (StudentRecord record in skipped_EAL[g])
                     {
                         returnMe.Append($"  {record.GovID}\t{record.Level}\t{record.Name}\t{record.SourceSchoolFileName}\n");
                     }
                 }
 
                 returnMe.Append($" Grade {grade}  skipped due to not participating (NA) ({thisgrade_skipped_na}): \n");
-                foreach(string g in skipped_NA.Keys)
+                foreach (string g in skipped_NA.Keys)
                 {
-                    foreach(StudentRecord record in skipped_NA[g])
+                    foreach (StudentRecord record in skipped_NA[g])
                     {
                         returnMe.Append($"  {record.GovID}\t{record.Level}\t{record.Name}\t{record.SourceSchoolFileName}\n");
                     }
@@ -261,6 +277,6 @@ public class DataAnalysis
         }
 
         returnMe.Append("\n");
-        return returnMe.ToString();;
+        return returnMe.ToString(); ;
     }
 }
