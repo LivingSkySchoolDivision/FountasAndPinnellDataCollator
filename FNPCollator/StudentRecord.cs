@@ -35,7 +35,14 @@ public class StudentRecord
                 ((this.Level.Length > 0) && (this.Level.Length <= 5))
                 )
             {
-                return true;
+                if (this.GovID == "SKIP")
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
             }
         }
         return false;
