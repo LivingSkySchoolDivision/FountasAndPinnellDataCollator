@@ -66,7 +66,7 @@ public static class FandPSpreadsheetParser
                     // UPDATE: This used to be "NA" but now should be "NM" as per the ministry
                     if (string.IsNullOrEmpty(record.Level))
                     {
-                        record.Level = "NA";
+                        record.Level = "NM";
                         record.LevelWasBlankButWasCorrected = true;
                     }
 
