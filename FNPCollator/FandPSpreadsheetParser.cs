@@ -14,7 +14,8 @@ public static class FandPSpreadsheetParser
         {
             if (cell.CellType == CellType.Formula)
             {
-                switch (cell.GetCachedFormulaResultTypeEnum()) {
+                switch (cell.GetCachedFormulaResultTypeEnum())
+                {
                     case CellType.Boolean:
                         return cell.BooleanCellValue.ToString() ?? string.Empty;
                     case CellType.Numeric:
@@ -24,19 +25,25 @@ public static class FandPSpreadsheetParser
                     default:
                         return cell?.ToString() ?? string.Empty;
                 }
-            } else {
+            }
+            else
+            {
                 return cell?.ToString() ?? string.Empty;
             }
-        } else {
+        }
+        else
+        {
             return string.Empty;
         }
     }
 
     private static StudentRecord parseStudentRecord(IRow row, FandPSpreadsheet parentFile)
     {
+
         StudentRecord record = new StudentRecord();
 
-        if (row != null) {
+        if (row != null)
+        {
             if (row.GetCell(0) != null)
             {
                 record.GovID = row.GetCell(0).ToString() ?? string.Empty;
@@ -59,7 +66,7 @@ public static class FandPSpreadsheetParser
                     // UPDATE: This used to be "NA" but now should be "NM" as per the ministry
                     if (string.IsNullOrEmpty(record.Level))
                     {
-                        record.Level = "NM";
+                        record.Level = "NA";
                         record.LevelWasBlankButWasCorrected = true;
                     }
 
@@ -84,6 +91,7 @@ public static class FandPSpreadsheetParser
 
     public static FandPSpreadsheet ParseFandPExcelSpreadsheet(string FileName)
     {
+
         FandPSpreadsheet parsedFile = new FandPSpreadsheet();
 
         if (File.Exists(FileName))
@@ -116,27 +124,34 @@ public static class FandPSpreadsheetParser
                     if ((parsedFile.Teacher == "UNKNOWN") || (string.IsNullOrEmpty(parsedFile.Teacher)))
                     {
                         throw new Exception("Unable to parse - file does not appear to be formatted correctly (Missing teacher, got '" + parsedFile.Teacher + "').");
-                    } else if ((parsedFile.Grade == "UNKNOWN") || (string.IsNullOrEmpty(parsedFile.Teacher)))
+                    }
+                    else if ((parsedFile.Grade == "UNKNOWN") || (string.IsNullOrEmpty(parsedFile.Teacher)))
                     {
                         throw new Exception("Unable to parse - file does not appear to be formatted correctly (Missing grade).");
-                    } else if ((parsedFile.SchoolName == "UNKNOWN") || (string.IsNullOrEmpty(parsedFile.Teacher)))
+                    }
+                    else if ((parsedFile.SchoolName == "UNKNOWN") || (string.IsNullOrEmpty(parsedFile.Teacher)))
                     {
                         throw new Exception("Unable to parse - file does not appear to be formatted correctly (Missing School Name).");
-                    } else if ((parsedFile.AssessmentDate < new DateTime(2010,01,01)))
+                    }
+                    else if ((parsedFile.AssessmentDate < new DateTime(2010, 01, 01)))
                     {
                         throw new Exception("Unable to parse - file does not appear to be formatted correctly (Missing or invalid assessment date).");
-                    } else {
+                    }
+                    else
+                    {
                         // Try to parse out the school from the school name so
                         // we have it's DAN
                         parsedFile.SchoolDAN = LSSD_SCHOOLS.FindSchoolDAN(parsedFile.SchoolName);
 
                         // Parse out any student records in the file
-                        for(int x = 0; x <= maxRecordsToAttemptPerFile; x++ )
+                        for (int x = 0; x <= maxRecordsToAttemptPerFile; x++)
                         {
                             if (sheet_Spring != null)
                             {
-                                IRow row = sheet_Spring.GetRow(x+9);
+
+                                IRow row = sheet_Spring.GetRow(x + 9);
                                 StudentRecord record = parseStudentRecord(row, parsedFile);
+
                                 if (record.isValid())
                                 {
                                     parsedFile.Records.Add(record);
@@ -144,12 +159,16 @@ public static class FandPSpreadsheetParser
                             }
                         }
                     }
-                } else {
+                }
+                else
+                {
                     throw new Exception("Unable to parse - file does not appear to be formatted correctly (Missing 'Fall' and 'Spring' sheets).");
                 }
             }
 
-        } else {
+        }
+        else
+        {
             throw new Exception("File does not exist.");
         }
 
@@ -157,7 +176,9 @@ public static class FandPSpreadsheetParser
         if (parsedFile.IsValid())
         {
             return parsedFile;
-        } else {
+        }
+        else
+        {
             throw new Exception("Could not parse file.");
         }
 
