@@ -25,7 +25,7 @@ public static class LSSD_SCHOOLS
         new School() { Name = "McLurg High School", DAN = "5910923", Identifiers = new List<string>() { }},
         new School() { Name = "Meadow Lake Christian Academy", DAN = "6694003", Identifiers = new List<string>() { "MLCA" }},
         new School() { Name = "Medstead Central School", DAN = "6410513", Identifiers = new List<string>() { "Medstead" }},
-        new School() { Name = "Newmark Colony School", DAN = "6710722", Identifiers = new List<string>() { "Newmark" }},
+        new School() { Name = "Newmark Colony School", DAN = "6410722", Identifiers = new List<string>() { "Newmark" }},
         new School() { Name = "Norman Carter Elementary School", DAN = "5910911", Identifiers = new List<string>() { "Norman Carter", "Norman Carter School" }},
         new School() { Name = "North Battleford Comprehensive High School", DAN = "5850904", Identifiers = new List<string>() { }},
         new School() { Name = "Scott Colony School", DAN = "5911113", Identifiers = new List<string>() { "Scott" }},
